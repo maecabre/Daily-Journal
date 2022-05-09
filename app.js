@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const _ = require("lodash");
 const mongoose = require("mongoose");
-const config = require(__dirname + "/config");
+// const config = require(__dirname + "/config");
 
 // import Mongoose Models
 const Post = require(__dirname + "/post.js");
