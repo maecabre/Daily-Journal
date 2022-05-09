@@ -3,7 +3,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
-const lodash = require("lodash");
+const _ = require("lodash");
+const mongoose = require("mongoose");
+
+// import Mongoose Models
+const Post = require(__dirname + "/post.js");
 
 
 const homeStartingContent = "Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.";
@@ -19,13 +23,46 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 // Globals
-let posts = [];
+// let posts = [];
+
+// remove usage of this array
+
+// --------------------------------------------------------
+// Main Connection
+
+main().catch(err => console.log(`main() error: ${err}`));
+async function main(){
+
+	// Local Connection/DB
+	// const db = "blogDB";
+	const myConnection = await mongoose.connect('mongodb://localhost:27017/blogDB');
+
+
+
+
+}
+
+// --------------------------------------------------------
+// Functions
+
+// Query All
+async function getQueryAll(){
+	return await Post.find({}, (err, results) => {
+		if(err){
+			console.log(`getQueryAll(): ${err}`);
+		}
+	}).clone().catch(err => console.log(`Post.find().clone() error: ${err}`));
+}
+
 
 // --------------------------------------------------------
 
 // GET request, home
-app.get("/", function(req, res){
+app.get("/", async function(req, res){
 	// Replace "homeStartingContent" (home.ejs) with "homeStartingContent" (app.js)
+
+
+	let posts = await getQueryAll();
 
 	res.render("home", {
 		homeStartingContent: homeStartingContent,
@@ -34,11 +71,13 @@ app.get("/", function(req, res){
 });
 
 // GET request, posts
-app.get("/posts/:postID", function(req, res){
+app.get("/posts/:postID", async function(req, res){
 
-	posts.forEach((postObject) =>{
-		let storedTitle = lodash.lowerCase(postObject.title);
-		let requestedTitle = lodash.lowerCase(req.params.postID) ;
+	let postsArray = await getQueryAll();
+
+	postsArray.forEach((postObject) =>{
+		let storedTitle = _.lowerCase(postObject.title);
+		let requestedTitle = _.lowerCase(req.params.postID) ;
 
 		if(storedTitle == requestedTitle){
 
@@ -48,7 +87,7 @@ app.get("/posts/:postID", function(req, res){
 			});
 
 		} else{
-			console.log('Match not found');
+			// console.log('Match not found');
 		}
 	});
 });
@@ -73,14 +112,23 @@ app.get("/compose", function(req, res){
 // --------------------------------------------------------
 
 // POST request, home
-app.post("/compose", function(req, res){
+app.post("/compose", async function(req, res){
 	// console.log(req.body);
 	let postToPublish = {
 		title: req.body.composeInput,
 		body: req.body.postInput
 	};
-	posts.push(postToPublish);
-	res.redirect("/");
+
+	let newPost = new Post(postToPublish);
+	await newPost.save((err) => {
+		if(!err){
+			res.redirect("/");
+		} else{
+			console.log(`newPost.save() error: ${err}`);
+		}
+	});
+
+	
 });
 
 
