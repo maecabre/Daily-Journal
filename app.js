@@ -34,8 +34,12 @@ async function main(){
 	// const myConnection = await mongoose.connect('mongodb://localhost:27017/blogDB');
 
 	// User for local deployment with config import
-	const userName = config.userName;
-	const escapePassword = config.escapePassword;
+	// const userName = config.userName;
+	// const escapePassword = config.escapePassword;
+
+	// Use for heroku deployment
+	const userName = process.env.USERNAME;
+	const escapePassword = process.env.ESCAPE_PASSWORD;
 
 	const uri = "mongodb+srv://" + userName + ":" + escapePassword + "@cluster0.c6xf1.mongodb.net/todolistDB?retryWrites=true&w=majority";
 	const todoConnection =  await mongoose.connect(uri);
