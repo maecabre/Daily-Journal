@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const _ = require("lodash");
 const mongoose = require("mongoose");
+const config = require(__dirname + "/config");
 
 // import Mongoose Models
 const Post = require(__dirname + "/post.js");
@@ -22,10 +23,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 // Set Express to allow other custom files
 app.use(express.static("public"));
 
-// Globals
-// let posts = [];
-
-// remove usage of this array
 
 // --------------------------------------------------------
 // Main Connection
@@ -34,13 +31,16 @@ main().catch(err => console.log(`main() error: ${err}`));
 async function main(){
 
 	// Local Connection/DB
-	// const db = "blogDB";
-	const myConnection = await mongoose.connect('mongodb://localhost:27017/blogDB');
+	// const myConnection = await mongoose.connect('mongodb://localhost:27017/blogDB');
 
+	// User for local deployment with config import
+	const userName = config.userName;
+	const escapePassword = config.escapePassword;
 
-
-
+	const uri = "mongodb+srv://" + userName + ":" + escapePassword + "@cluster0.c6xf1.mongodb.net/todolistDB?retryWrites=true&w=majority";
+	const todoConnection =  await mongoose.connect(uri);
 }
+
 
 // --------------------------------------------------------
 // Functions
@@ -108,7 +108,6 @@ app.get("/compose", function(req, res){
 });
 
 
-
 // --------------------------------------------------------
 
 // POST request, home
@@ -130,11 +129,6 @@ app.post("/compose", async function(req, res){
 
 	
 });
-
-
-
-
-
 
 
 // --------------------------------------------------------
